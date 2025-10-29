@@ -50,8 +50,8 @@ public class Book {
     }
 
     //toString() Method
-    @Override
-    public String toString(){
+    @Override //Tells the compiler you’re replacing a parent method safely
+    public String toString(){ //Defines how your object looks when printed as text
         return "Book ID: " + bookId +
                 ", Name: " + bookName +
                 ", Author: " + bookAuthor +
