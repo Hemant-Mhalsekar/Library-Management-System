@@ -2,7 +2,6 @@ package com.library.model;
 
 public class Book {
     // Attributes
-
     private int bookId;
     private String bookName;
     private String bookAuthor;
