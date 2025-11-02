@@ -1,26 +1,26 @@
 package com.library.dao;
 
 import com.library.model.Transaction;
-
 import java.sql.*;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
 public class TransactionDAO {
 
-    public void addTransaction(Transaction transaction){
+    public void addTransaction(Transaction transaction) {
         String sql = "INSERT INTO transactions (transaction_id, book_id, member_id, issue_date, return_date, fine_amount) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)){
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, transaction.getTransactionId());
             stmt.setInt(2, transaction.getBookId());
             stmt.setInt(3, transaction.getMemberId());
             stmt.setDate(4, java.sql.Date.valueOf(transaction.getIssueDate()));
 
-            if (transaction.getReturnDate() != null){
+            if (transaction.getReturnDate() != null) {
                 stmt.setDate(5, java.sql.Date.valueOf(transaction.getReturnDate()));
             } else {
                 stmt.setNull(5, Types.DATE);
@@ -33,7 +33,7 @@ public class TransactionDAO {
                 System.out.println("Transaction added successfully for Book ID: " + transaction.getBookId());
             }
         } catch (SQLException e) {
-            System.out.println("Error adding transaction: " +e.getMessage());
+            System.out.println("Error adding transaction: " + e.getMessage());
         }
     }
 
@@ -42,7 +42,7 @@ public class TransactionDAO {
         String sql = "SELECT * FROM transactions";
 
         try (Connection conn = DatabaseConnection.getConnection();
-            PreparedStatement stmt = conn.prepareStatement(sql);
+             PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
@@ -56,10 +56,12 @@ public class TransactionDAO {
                 );
                 transactions.add(transaction);
             }
+
         } catch (SQLException e) {
             System.out.println("Error fetching transactions: " + e.getMessage());
         }
-        return  transactions;
+
+        return transactions;
     }
 
     public Transaction getTransactionById(int transactionId) {
@@ -67,7 +69,7 @@ public class TransactionDAO {
         String sql = "SELECT * FROM transactions WHERE transaction_id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)){
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, transactionId);
             ResultSet rs = stmt.executeQuery();
@@ -82,51 +84,68 @@ public class TransactionDAO {
                         rs.getDouble("fine_amount")
                 );
             }
+
         } catch (SQLException e) {
             System.out.println("Error fetching transaction by ID: " + e.getMessage());
         }
+
         return transaction;
     }
 
-    public void updateReturnDateAndFine(int transactionId, LocalDate returnDate, double fineAmount) {
-        String sql = "UPDATE transactions SET return_date = ?, fine_amount = ? WHERE transaction_id = ?";
+    public void updateReturnDateAndFine(int transactionId, LocalDate returnDate) {
+        String selectSql = "SELECT issue_date FROM transactions WHERE transaction_id = ?";
+        String updateSql = "UPDATE transactions SET return_date = ?, fine_amount = ? WHERE transaction_id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
-            PreparedStatement stmt = conn.prepareStatement(sql)){
+             PreparedStatement selectStmt = conn.prepareStatement(selectSql);
+             PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
 
-            stmt.setDate(1, java.sql.Date.valueOf(returnDate));
-            stmt.setDouble(2, fineAmount);
-            stmt.setInt(3, transactionId);
+            selectStmt.setInt(1, transactionId);
+            ResultSet rs = selectStmt.executeQuery();
 
-            int rowUpdated = stmt.executeUpdate();
+            if (rs.next()) {
+                LocalDate issueDate = rs.getDate("issue_date").toLocalDate();
 
-            if (rowUpdated > 0) {
-                System.out.println("Return date and fine updated for transaction ID: " + transactionId);
+                long daysLate = ChronoUnit.DAYS.between(issueDate, returnDate);
+                double fine = (daysLate > 7) ? (daysLate - 7) * 5 : 0;
+
+                updateStmt.setDate(1, java.sql.Date.valueOf(returnDate));
+                updateStmt.setDouble(2, fine);
+                updateStmt.setInt(3, transactionId);
+
+                int rowsUpdated = updateStmt.executeUpdate();
+                if (rowsUpdated > 0) {
+                    System.out.println("Book returned! Fine: ₹" + fine);
+                } else {
+                    System.out.println("No transaction found with ID: " + transactionId);
+                }
             } else {
-                System.out.println("No transaction found with ID: " + transactionId);
+                System.out.println("Transaction not found for ID: " + transactionId);
             }
 
         } catch (SQLException e) {
-            System.out.println("Error updating transaction: " + e.getMessage());
+            System.out.println("Error updating return date and fine: " + e.getMessage());
         }
     }
 
+    //Delete transaction (optional)
     public void deleteTransaction(int transactionId) {
         String sql = "DELETE FROM transactions WHERE transaction_id = ?";
 
-        try(Connection conn = DatabaseConnection.getConnection();
-            PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, transactionId);
             int rowDeleted = stmt.executeUpdate();
 
             if (rowDeleted > 0) {
-                System.out.println("Transaction with ID " + transactionId + " deleted successfuly!");
+                System.out.println("Transaction with ID " + transactionId + " deleted successfully!");
             } else {
                 System.out.println("No transaction found with ID: " + transactionId);
             }
+
         } catch (SQLException e) {
-            System.out.println("Error deleting transaction: "+ e.getMessage());
+            System.out.println("Error deleting transaction: " + e.getMessage());
         }
     }
 }
