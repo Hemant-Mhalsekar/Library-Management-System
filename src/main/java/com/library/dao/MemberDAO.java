@@ -36,8 +36,8 @@ public class MemberDAO {
         String sql = "SELECT * FROM members";
 
         try (Connection conn = DatabaseConnection.getConnection();
-            PreparedStatement smtm = conn.prepareStatement(sql);
-             ResultSet rs = smtm.executeQuery()){
+            PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()){
 
             while (rs.next()) {
                 Member member = new Member(
