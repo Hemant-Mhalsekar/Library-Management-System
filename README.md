@@ -60,23 +60,23 @@ All operations are connected to a **MySQL database**, ensuring that data is stor
 ## 🏗️ System Architecture
 
 ```
-┌─────────────────────────────────────────────┐
-│                 UI Layer                    │
-│          (LibraryApp.java)                  │
-│    ⇅ user interacts through console          │
-├─────────────────────────────────────────────┤
-│               Service Layer                 │
+┌───────────────────────────────────────────────────┐
+│                 UI Layer                          │
+│          (LibraryApp.java)                        │
+│    ⇅ user interacts through console               │
+├───────────────────────────────────────────────────┤
+│               Service Layer                       │
 │  (BookService, MemberService, TransactionService) │
-│   ⇅ contains business logic and validation   │
-├─────────────────────────────────────────────┤
-│                 DAO Layer                   │
-│    (BookDAO, MemberDAO, TransactionDAO)     │
-│   ⇅ handles SQL queries and DB interaction   │
-├─────────────────────────────────────────────┤
-│                 Model Layer                 │
-│  (Book, Member, Transaction, Librarian)     │
-│   ⇅ represents entities and data structure   │
-└─────────────────────────────────────────────┘
+│   ⇅ contains business logic and validation        │
+├───────────────────────────────────────────────────┤
+│                 DAO Layer                         │
+│    (BookDAO, MemberDAO, TransactionDAO)           │
+│   ⇅ handles SQL queries and DB interaction        │
+├───────────────────────────────────────────────────┤
+│                 Model Layer                       │
+│  (Book, Member, Transaction, Librarian)           │
+│   ⇅ represents entities and data structure        │
+└───────────────────────────────────────────────────┘
 ```
 
 ---
@@ -174,7 +174,7 @@ Make sure your `pom.xml` includes the **MySQL Connector** dependency:
 
 ### Step 1 — Clone or Download
 ```bash
-git clone https://github.com/<your-username>/Library-Management-System.git
+git clone https://github.com/Hemant-Mhalsekar/Library-Management-System.git
 ```
 
 ### Step 2 — Configure Database Connection
@@ -183,7 +183,7 @@ Edit `DatabaseConnection.java`:
 ```java
 private static final String URL = "jdbc:mysql://localhost:3306/library_db";
 private static final String USER = "root";
-private static final String PASSWORD = "user";
+private static final String PASSWORD = "your_password";
 ```
 
 ### Step 3 — Build and Run
@@ -233,22 +233,6 @@ Book issued successfully! Transaction added successfully! ID: 4
 
 ---
 
-## 🧪 Example Database Records
-
-### `books`
-| book_id | book_name     | book_author     | book_availability |
-|----------|----------------|-----------------|-------------------|
-| 1        | Atomic Habits  | James Clear     | 0                 |
-| 2        | Clean Code     | Robert Martin   | 1                 |
-
-### `members`
-| member_id | member_name   | member_type | membership_date |
-|------------|---------------|-------------|-----------------|
-| 1          | Sannadhi Das  | Student     | 2025-11-02      |
-| 2          | Mehul Lunia   | Reader      | 2025-11-02      |
-
----
-
 ## 🌟 Future Enhancements
 
 - ✅ Add librarian login and authentication  
@@ -266,8 +250,8 @@ Book issued successfully! Transaction added successfully! ID: 4
 🎓 MCA (Artificial Intelligence & Machine Learning) — Jain (Deemed-to-be University)  
 💼 Interests: Software Development, Web Development, AI/ML  
 🌍 Location: Goa / Bangalore  
-📧 Email: your.email@example.com  
-🔗 [LinkedIn Profile](https://www.linkedin.com/in/hemant-mhalsekar)
+📧 Email: hemantmhalsekar1@gmail.com  
+🔗 [LinkedIn Profile](https://www.linkedin.com/in/hemant-mhalsekar-464a50244/)
 
 ---
 
