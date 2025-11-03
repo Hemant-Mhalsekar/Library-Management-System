@@ -16,10 +16,9 @@ public class MemberDAO {
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setInt(1, member.getMemberId());
-            stmt.setString(2, member.getMemberName());
-            stmt.setString(3, member.getMemberType());
-            stmt.setDate(4, java.sql.Date.valueOf(member.getMembershipDate()));
+            stmt.setString(1, member.getMemberName());
+            stmt.setString(2, member.getMemberType());
+            stmt.setDate(3, java.sql.Date.valueOf(member.getMembershipDate()));
 
             int rowInserted = stmt.executeUpdate();
 

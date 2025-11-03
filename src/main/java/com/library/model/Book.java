@@ -15,6 +15,7 @@ public class Book {
         this.bookAvailability = bookAvailability;
     }
 
+
     //Getters and Setters
     public int getBookId(){
         return bookId;

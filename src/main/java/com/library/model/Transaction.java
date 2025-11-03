@@ -24,7 +24,6 @@ public class Transaction {
 
     //Getters and Setters
 
-
     public int getTransactionId() {
         return transactionId;
     }

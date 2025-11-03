@@ -17,7 +17,7 @@ public class TestBookDAO {
         int idToUpdate = 1; // use an ID that exists in your DB
         boolean newAvailability = false; // try setting to false first
 
-        dao.updateAvailability(idToUpdate, newAvailability);;
+        dao.updateAvailability(idToUpdate, newAvailability);
     }
 
 

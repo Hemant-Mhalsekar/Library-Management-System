@@ -23,7 +23,7 @@ public class TestTransactionDAO {
         System.out.println(found != null ? found : "No transaction found!");
 
         //Update return date and fine
-        dao.updateReturnDateAndFine(1, LocalDate.now());
+        dao.updateReturnDateAndFine(1, LocalDate.now(), 0.0);
 
         //Delete transaction
         dao.deleteTransaction(1);

@@ -10,32 +10,46 @@ import java.util.List;
 public class TransactionDAO {
 
     public void addTransaction(Transaction transaction) {
-        String sql = "INSERT INTO transactions (transaction_id, book_id, member_id, issue_date, return_date, fine_amount) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO transactions (book_id, member_id, issue_date, return_date, fine_amount) VALUES (?, ?, ?, ?, ?)";
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try {
+            // Moved try-with-resources inside the try block
+            Connection conn = DatabaseConnection.getConnection();
+            try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            stmt.setInt(1, transaction.getTransactionId());
-            stmt.setInt(2, transaction.getBookId());
-            stmt.setInt(3, transaction.getMemberId());
-            stmt.setDate(4, java.sql.Date.valueOf(transaction.getIssueDate()));
+                stmt.setInt(1, transaction.getBookId());
+                stmt.setInt(2, transaction.getMemberId());
+                stmt.setDate(3, java.sql.Date.valueOf(transaction.getIssueDate()));
 
-            if (transaction.getReturnDate() != null) {
-                stmt.setDate(5, java.sql.Date.valueOf(transaction.getReturnDate()));
-            } else {
-                stmt.setNull(5, Types.DATE);
+                if (transaction.getReturnDate() != null) {
+                    stmt.setDate(4, java.sql.Date.valueOf(transaction.getReturnDate()));
+                } else {
+                    stmt.setNull(4, Types.DATE);
+                }
+
+                stmt.setDouble(5, transaction.getFineAmount());
+
+                int rowInserted = stmt.executeUpdate();
+
+                // ✅ Fetch auto-generated ID
+                if (rowInserted > 0) {
+                    try (ResultSet rs = stmt.getGeneratedKeys()) {
+                        if (rs.next()) {
+                            int generatedId = rs.getInt(1);
+                            System.out.println("Transaction added successfully! ID: " + generatedId);
+                        }
+                    }
+                }
+
+            } finally {
+                conn.close(); // ✅ Explicitly close connection
             }
 
-            stmt.setDouble(6, transaction.getFineAmount());
-
-            int rowInserted = stmt.executeUpdate();
-            if (rowInserted > 0) {
-                System.out.println("Transaction added successfully for Book ID: " + transaction.getBookId());
-            }
         } catch (SQLException e) {
             System.out.println("Error adding transaction: " + e.getMessage());
         }
     }
+
 
     public List<Transaction> getAllTransactions() {
         List<Transaction> transactions = new ArrayList<>();
@@ -92,41 +106,28 @@ public class TransactionDAO {
         return transaction;
     }
 
-    public void updateReturnDateAndFine(int transactionId, LocalDate returnDate) {
-        String selectSql = "SELECT issue_date FROM transactions WHERE transaction_id = ?";
-        String updateSql = "UPDATE transactions SET return_date = ?, fine_amount = ? WHERE transaction_id = ?";
+    public void updateReturnDateAndFine(int transactionId, LocalDate returnDate, double fineAmount) {
+        String sql = "UPDATE transactions SET return_date = ?, fine_amount = ? WHERE transaction_id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement selectStmt = conn.prepareStatement(selectSql);
-             PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            selectStmt.setInt(1, transactionId);
-            ResultSet rs = selectStmt.executeQuery();
+            stmt.setDate(1, java.sql.Date.valueOf(returnDate));
+            stmt.setDouble(2, fineAmount);
+            stmt.setInt(3, transactionId);
 
-            if (rs.next()) {
-                LocalDate issueDate = rs.getDate("issue_date").toLocalDate();
-
-                long daysLate = ChronoUnit.DAYS.between(issueDate, returnDate);
-                double fine = (daysLate > 7) ? (daysLate - 7) * 5 : 0;
-
-                updateStmt.setDate(1, java.sql.Date.valueOf(returnDate));
-                updateStmt.setDouble(2, fine);
-                updateStmt.setInt(3, transactionId);
-
-                int rowsUpdated = updateStmt.executeUpdate();
-                if (rowsUpdated > 0) {
-                    System.out.println("Book returned! Fine: ₹" + fine);
-                } else {
-                    System.out.println("No transaction found with ID: " + transactionId);
-                }
+            int rowsUpdated = stmt.executeUpdate();
+            if (rowsUpdated > 0) {
+                System.out.println("Return date and fine updated for transaction ID: " + transactionId);
             } else {
-                System.out.println("Transaction not found for ID: " + transactionId);
+                System.out.println("No transaction found with ID: " + transactionId);
             }
 
         } catch (SQLException e) {
             System.out.println("Error updating return date and fine: " + e.getMessage());
         }
     }
+
 
     //Delete transaction (optional)
     public void deleteTransaction(int transactionId) {
